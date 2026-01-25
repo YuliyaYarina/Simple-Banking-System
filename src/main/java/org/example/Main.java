@@ -2,8 +2,6 @@ package org.example;
 
 import org.example.controller.AccountController;
 import org.example.model.Account;
-import org.example.service.AccountService;
-import org.example.service.serviceImpl.AccountServiceImpl;
 
 import java.util.Scanner;
 
@@ -11,7 +9,6 @@ import java.util.Scanner;
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
 
-    private static final AccountService service = new AccountServiceImpl();
     private static final AccountController controller= new AccountController();
 
     static void main() {
