@@ -30,7 +30,7 @@ public class Account {
      * Создает новый счет с случайно сгенерированным номером карты и ПИН-кодом, и начальным балансом равным нулю.
      */
     public Account() {
-        this.numberCard = Generator.numberCard();
+        this.numberCard = new Generator().numberCard();
         this.PINCard = Generator.PINCard();
         this.balance = ZERO_BALANCE;
     }
