@@ -5,22 +5,21 @@ import java.util.Random;
 public class Generator extends Random implements LuhnAlgorithm {
 
     private final static String MII = "4";
-    private final static String BIN_VISA_FREEDOM = MII + "00000";
+    private final static String BIN_VISA_FREEDOM = "00000";
     private static int ACCOUNT_IDENTIFIER  = 0;
 
     private final static int PIN_LOWER_LIMIT_VALUES = 1000;
     private final static int PIN_UPPER_LIMIT_VALUES = 9999;
 
-
     /**
      * Генерирует номер карты и инкремент ACCOUNT_IDENTIFIER.
      * @return номер карты.
      */
-    Long numberCard(){
-        String numberCard = generatedLuhnAlgorithm(BIN_VISA_FREEDOM +
+    public Long numberCard(){
+        String numberCard = generatedLuhnAlgorithm(MII + BIN_VISA_FREEDOM +
                 String.format("%09d", ACCOUNT_IDENTIFIER));
 
-        incrementAccountIdentifier();
+        incrementAccountIdentifier(null);
         return Long.valueOf(numberCard);
     }
 
@@ -28,17 +27,39 @@ public class Generator extends Random implements LuhnAlgorithm {
      * Генерирует PIN для карты.
      * @return PIN.
      */
-    static synchronized int PINCard(){
+    public synchronized int PINCard(){
         return new Random().nextInt(PIN_UPPER_LIMIT_VALUES - PIN_LOWER_LIMIT_VALUES + 1) + PIN_LOWER_LIMIT_VALUES;
     }
 
     /**
-     * Инкремент ACCOUNT_IDENTIFIER.
+     * Метод получает крайний созданный номер карты, и увеличивает это число.
      */
-    private static synchronized void incrementAccountIdentifier(){
-        ACCOUNT_IDENTIFIER++;
+    public static synchronized void incrementAccountIdentifier(String lastCardNumber){
+        if(lastCardNumber != null){
+            String[] cardNumberLast = new String[9];
+            int t = 0;
+            for (int i = 6; i < 15;  i++){
+                cardNumberLast[t] =
+                        lastCardNumber.split("")[i];
+                t++;
+            }
+            StringBuilder transformsToString = new StringBuilder();
+            for (String s : cardNumberLast) transformsToString.append(s);
+            ACCOUNT_IDENTIFIER = Integer.parseInt(transformsToString.toString());
+            ACCOUNT_IDENTIFIER++;
+        }else{
+            ACCOUNT_IDENTIFIER++;
+        }
     }
 
+
+    // методы луна нужно перенести в отдельный class
+
+    /**
+     * Получает строку, переносит в массив, и выполняет по очереди операции алгоритма Луна.
+     * @param numberCard номер карты, без крайней цифры.
+     * @return
+     */
     @Override
     public synchronized String generatedLuhnAlgorithm(String numberCard){
         int[] newNumberCard ;

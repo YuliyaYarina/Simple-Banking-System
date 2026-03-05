@@ -4,6 +4,6 @@ import org.example.model.Account;
 
 public interface AccountService {
     String createAccount();
-    Account logAccountAnCardNumber(Long numberCard,  int PINCard) throws Exception;
-        String getBalanse(Account account);
+    Boolean logAccountAnCardNumber(long numberCard, int PINCard);
+    String getBalance(long account);
 }

@@ -1,6 +1,5 @@
 package org.example.controller;
 
-import org.example.model.Account;
 import org.example.service.AccountService;
 import org.example.service.serviceImpl.AccountServiceImpl;
 
@@ -14,11 +13,12 @@ public class AccountController {
     }
 
     /**
-     * Определяет, что пришло на вход PIN или номер карты, и вызывает нужный метод.
+     * Сравнивает PIN.
      * @param numberCard номер
+     * @param PINCard PIN
      * @return true или false в зависимости от результата
      */
-    public Account loginOnNumberCard(Long numberCard, int PINCard) throws Exception {
+    public Boolean equalsPIN(long numberCard, int PINCard) {
             return accountService.logAccountAnCardNumber(numberCard, PINCard);
     }
 
@@ -27,7 +27,7 @@ public class AccountController {
      * @param account аккаунт
      * @return String баланс аккаунта.
      */
-    public String getBalance(Account account) {
-        return accountService.getBalanse(account);
+    public String getBalance(long account) {
+        return accountService.getBalance(account);
     }
 }

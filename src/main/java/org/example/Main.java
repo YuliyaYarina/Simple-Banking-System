@@ -1,7 +1,7 @@
 package org.example;
 
 import org.example.controller.AccountController;
-import org.example.model.Account;
+import org.example.except.NumberCardIsNotInDBException;
 
 import java.util.Scanner;
 
@@ -10,6 +10,12 @@ import java.util.Scanner;
 public class Main {
 
     private static final AccountController controller= new AccountController();
+    private static Scanner input;
+
+    {
+        input = new Scanner(System.in);
+    }
+
 
     static void main() {
         selectsAction();
@@ -37,6 +43,12 @@ public class Main {
                 0. Exit
                 """);
     }
+    /**
+     * Выводит на экран меню "Bye!".
+     */
+    static void printTheMenuBye() {
+        System.out.println("\nBye!");
+    }
 
     /**
      * По введенному номеру, выбирает действие.
@@ -49,12 +61,12 @@ public class Main {
                 selectsAction();
                 break;
             case 2:
-
                 searchAccount();
                 selectsAction();
                 break;
             case 0:
-                System.out.println(0);
+                input.close();
+                printTheMenuBye();
                 break;
                 default:
                     System.out.println("there is no such option, try again.");
@@ -66,7 +78,7 @@ public class Main {
      * По введенному номеру, выбирает действие в аккаунте.
      * @param account аккаунт.
      */
-    private static void logIntoAccount(Account account) {
+    private static void logIntoAccount(Long account) {
         printTheMenuIntoAccount();
         switch(Integer.parseInt(scan())) {
             case 1:
@@ -92,7 +104,7 @@ public class Main {
      */
     private static String scan() {
         try {
-            Scanner input = new Scanner(System.in);
+            input = new Scanner(System.in);
             return input.next();
         } catch (NullPointerException e) {
             System.out.println("Please enter a text, NullPointerException");
@@ -114,23 +126,25 @@ public class Main {
      * Находит аккаунт.
      */
     private static void searchAccount()  {
-            try {
-                System.out.println("Enter your card number:");
-                Long numberCard = Long.valueOf(scan());
-                System.out.println("Enter your PIN:");
-                int PINCard = Integer.parseInt(scan());
+        try {
+            System.out.println("Enter your card number:");
+            Long numberCard = Long.valueOf(scan());
+            System.out.println("Enter your PIN:");
+            int PINCard = Integer.parseInt(scan());
 
-                Account account = controller.loginOnNumberCard(numberCard, PINCard);
+            Boolean account = controller.equalsPIN(numberCard, PINCard);
 
-                if (account == null){
-                    System.out.println("\nWrong card number or PIN!\n");
+            if (!account) {
+                System.out.println("\nWrong card number or PIN!\n");
 
-                }else {
-                    System.out.println("\nYou have successfully logged in!\n");
-                    logIntoAccount(account);
-                }
-            }catch (Exception e){
-                System.out.println(e.getMessage());
+            } else {
+                System.out.println("\nYou have successfully logged in!\n");
+                logIntoAccount(numberCard);
             }
+        } catch (NumberCardIsNotInDBException e) {
+//        throw new NumberCardIsNotInDBException("\n Номера карты: " + " нет в BD ");
+            String message = e.getMessage();
+            System.out.println(message);
+        }
     }
 }

@@ -5,7 +5,6 @@ import java.util.Objects;
  * Представляет банковский счет с уникальным номером карты, ПИН-кодом и балансом.
  */
 public class Account {
-
     /**
      * Уникальный номер карты.
      */
@@ -27,11 +26,11 @@ public class Account {
     private final static long ZERO_BALANCE = 0;
 
     /**
-     * Создает новый счет с случайно сгенерированным номером карты и ПИН-кодом, и начальным балансом равным нулю.
+     * Создает новый счет случайно сгенерированным номером карты и ПИН-кодом, и начальным балансом равным нулю.
      */
-    public Account() {
-        this.numberCard = new Generator().numberCard();
-        this.PINCard = Generator.PINCard();
+    public Account(Long numberCard, int pin) {
+        this.numberCard = numberCard;
+        this.PINCard = pin;
         this.balance = ZERO_BALANCE;
     }
 
