@@ -1,11 +1,10 @@
 package org.example.model;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
-public class Generator extends Random implements LuhnAlgorithm {
+public class Generator extends SecureRandom implements LuhnAlgorithm {
 
-    private final static String MII = "4";
-    private final static String BIN_VISA_FREEDOM = "00000";
+    private final static String BIN = "400000";
     private static int ACCOUNT_IDENTIFIER  = 0;
 
     private final static int PIN_LOWER_LIMIT_VALUES = 1000;
@@ -16,7 +15,7 @@ public class Generator extends Random implements LuhnAlgorithm {
      * @return номер карты.
      */
     public Long numberCard(){
-        String numberCard = generatedLuhnAlgorithm(MII + BIN_VISA_FREEDOM +
+        String numberCard = generatedLuhnAlgorithm(BIN +
                 String.format("%09d", ACCOUNT_IDENTIFIER));
 
         incrementAccountIdentifier(null);
@@ -27,8 +26,8 @@ public class Generator extends Random implements LuhnAlgorithm {
      * Генерирует PIN для карты.
      * @return PIN.
      */
-    public synchronized int PINCard(){
-        return new Random().nextInt(PIN_UPPER_LIMIT_VALUES - PIN_LOWER_LIMIT_VALUES + 1) + PIN_LOWER_LIMIT_VALUES;
+    public synchronized String PINCard(){
+        return String.valueOf(new SecureRandom().nextInt(PIN_UPPER_LIMIT_VALUES - PIN_LOWER_LIMIT_VALUES + 1) + PIN_LOWER_LIMIT_VALUES);
     }
 
     /**
@@ -58,7 +57,7 @@ public class Generator extends Random implements LuhnAlgorithm {
     /**
      * Получает строку, переносит в массив, и выполняет по очереди операции алгоритма Луна.
      * @param numberCard номер карты, без крайней цифры.
-     * @return
+     * @return номер карты, соответствующий методу луна
      */
     @Override
     public synchronized String generatedLuhnAlgorithm(String numberCard){

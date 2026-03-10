@@ -8,12 +8,12 @@ public class Account {
     /**
      * Уникальный номер карты.
      */
-    private final long numberCard;
+    private final long cardNumber;
 
     /**
      * Личный идентификационный номер (ПИН-код) для счета.
      */
-    private final int PINCard;
+    private final String pin;
 
     /**
      * Текущий баланс счета.
@@ -28,9 +28,9 @@ public class Account {
     /**
      * Создает новый счет случайно сгенерированным номером карты и ПИН-кодом, и начальным балансом равным нулю.
      */
-    public Account(Long numberCard, int pin) {
-        this.numberCard = numberCard;
-        this.PINCard = pin;
+    public Account(Long numberCard, String pin) {
+        this.cardNumber = numberCard;
+        this.pin = pin;
         this.balance = ZERO_BALANCE;
     }
 
@@ -38,16 +38,16 @@ public class Account {
      * Возвращает уникальный номер карты счета.
      * @return номер карты
      */
-    public long getNumberCard() {
-        return numberCard;
+    public long getCardNumber() {
+        return cardNumber;
     }
 
     /**
      * Возвращает ПИН-код счета.
      * @return ПИН-код
      */
-    public int getPINCard() {
-        return PINCard;
+    public String getPin() {
+        return pin;
     }
 
     /**
@@ -66,6 +66,10 @@ public class Account {
         this.balance = balance;
     }
 
+    public boolean isPinCorrect(String pinToTest){
+        return this.pin.equals(pinToTest);
+    }
+
     /**
      * Проверяет, равен ли этот счет указанному объекту.
      * Два счета считаются равными, если у них одинаковый номер карты и ПИН-код.
@@ -76,19 +80,19 @@ public class Account {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Account account = (Account) o;
-        return Objects.equals(numberCard, account.numberCard) && Objects.equals(PINCard, account.PINCard);
+        return Objects.equals(cardNumber, account.cardNumber) && Objects.equals(pin, account.pin);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(numberCard, PINCard);
+        return Objects.hash(cardNumber, pin);
     }
 
     @Override
     public String toString() {
         return "Account{" +
-                "numberCard='" + numberCard + '\'' +
-                ", PINCard=" + PINCard +
+                "numberCard='" + cardNumber + '\'' +
+                ", PINCard=" + pin +
                 ", balance=" + balance +
                 '}';
     }

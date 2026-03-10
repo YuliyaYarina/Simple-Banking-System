@@ -3,6 +3,7 @@ package org.example;
 import org.example.controller.AccountController;
 import org.example.except.NumberCardIsNotInDBException;
 
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -54,23 +55,24 @@ public class Main {
      * По введенному номеру, выбирает действие.
      */
     static void selectsAction() {
-        printTheMenu();
-        switch (Integer.parseInt(scan())) {
-            case 1:
-                createAnAccount();
-                selectsAction();
-                break;
-            case 2:
-                searchAccount();
-                selectsAction();
-                break;
-            case 0:
-                input.close();
-                printTheMenuBye();
-                break;
+        boolean exit = false;
+        while (!exit) {
+            printTheMenu();
+            switch ((int)scan()) {
+                case 1:
+                    createAnAccount();
+                    break;
+                case 2:
+                    searchAccount();
+                    break;
+                case 0:
+                    input.close();
+                    printTheMenuBye();
+                    exit = true;
+                    break;
                 default:
                     System.out.println("there is no such option, try again.");
-                    selectsAction();
+            }
         }
     }
 
@@ -79,38 +81,40 @@ public class Main {
      * @param account аккаунт.
      */
     private static void logIntoAccount(Long account) {
-        printTheMenuIntoAccount();
-        switch(Integer.parseInt(scan())) {
-            case 1:
-                System.out.println(controller.getBalance(account));
-                logIntoAccount(account);
-                break;
+        boolean exit = false;
+        while (!exit){
+            printTheMenuIntoAccount();
+            switch((int) scan()) {
+                case 1:
+                    System.out.println(controller.getBalance(account));
+                    break;
                 case 2:
                     System.out.println("\n1You have successfully logged out!");
                     break;
-                    case 0:
-                        selectsAction();
-                        break;
-            default:
-                System.out.println("there is no such option, try again.");
-                selectsAction();
+                case 0:
+                    exit = true;
+                    break;
+                default:
+                    System.out.println("there is no such option, try again.");
+            }
         }
-
     }
 
     /**
      * Сканирует введенный номер.
+     *
      * @return введенный номер.
      */
-    private static String scan() {
+    private static long scan() {
         try {
             input = new Scanner(System.in);
-            return input.next();
+            return input.nextLong();
         } catch (NullPointerException e) {
             System.out.println("Please enter a text, NullPointerException");
             return scan();
-        } catch (Exception e) {
-            System.out.println("Please enter a text again");
+        } catch (InputMismatchException e) {
+            System.out.println("Please enter a text again" +
+                    "\n Исключение несоответствия входных данных");
             return scan();
         }
     }
@@ -128,15 +132,14 @@ public class Main {
     private static void searchAccount()  {
         try {
             System.out.println("Enter your card number:");
-            Long numberCard = Long.valueOf(scan());
+            long numberCard = scan();
             System.out.println("Enter your PIN:");
-            int PINCard = Integer.parseInt(scan());
+            String PINCard = String.valueOf(scan());
 
             Boolean account = controller.equalsPIN(numberCard, PINCard);
 
             if (!account) {
                 System.out.println("\nWrong card number or PIN!\n");
-
             } else {
                 System.out.println("\nYou have successfully logged in!\n");
                 logIntoAccount(numberCard);

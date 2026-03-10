@@ -43,7 +43,9 @@ public class BankingSystem {
      * @param numberAccount номер банковского счета.
      * @param account       банковский счет.
      */
-    public static void addAccount(Long numberAccount, Account account){
+    public static void
+
+    addAccount(Long numberAccount, Account account){
         accounts.put(numberAccount, account);
     }
 

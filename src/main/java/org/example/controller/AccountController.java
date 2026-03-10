@@ -18,7 +18,7 @@ public class AccountController {
      * @param PINCard PIN
      * @return true или false в зависимости от результата
      */
-    public Boolean equalsPIN(long numberCard, int PINCard) {
+    public Boolean equalsPIN(long numberCard, String PINCard) {
             return accountService.logAccountAnCardNumber(numberCard, PINCard);
     }
 

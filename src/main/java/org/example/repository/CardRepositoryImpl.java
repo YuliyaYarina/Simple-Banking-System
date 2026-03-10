@@ -74,7 +74,7 @@ public class CardRepositoryImpl implements CardRepository {
                     long id = accounts.getInt("id");
 
                     long number = Long.parseLong(accounts.getString("number"));
-                    int pin = Integer.parseInt(accounts.getString("pin"));
+                    String pin = accounts.getString("pin");
                     long balance = Long.parseLong(accounts.getString("balance"));
 
                     account = new Account(number, pin);

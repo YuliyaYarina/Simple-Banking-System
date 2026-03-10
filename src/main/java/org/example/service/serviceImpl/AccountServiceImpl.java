@@ -23,15 +23,15 @@ public class AccountServiceImpl implements AccountService {
             Generator.incrementAccountIdentifier(lastCardNumber);
 
             Account account = new Account(new Generator().numberCard(), new Generator().PINCard());
-            BankingSystem.addAccount(account.getNumberCard(), account);
+            BankingSystem.addAccount(account.getCardNumber(), account);
 
-            cardRepository.updatedCard(String.valueOf(account.getNumberCard()), String.valueOf(account.getPINCard()));
+            cardRepository.updatedCard(String.valueOf(account.getCardNumber()), String.valueOf(account.getPin()));
 
             return "\nYour card has been created\n" +
                     "Your card number:\n" +
-                    account.getNumberCard() +
+                    account.getCardNumber() +
                     "\nYour card PIN:\n" +
-                    account.getPINCard();
+                    account.getPin();
 
         } catch (RuntimeException | SQLException e ) {
             Exception e1 = e;
@@ -48,9 +48,9 @@ public class AccountServiceImpl implements AccountService {
      * @return найденный аккаунт, или null.
      */
     @Override
-    public Boolean logAccountAnCardNumber(long accountNumber, int PINCard) {
+    public Boolean logAccountAnCardNumber(long accountNumber, String PINCard) {
         Account account = cardRepository.getCard(accountNumber);
-        return PINCard == account.getPINCard();
+        return PINCard.equals(account.getPin());
     }
 
     @Override
