@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public interface CardRepository {
 
-    void updatedCard(String numberCard, String pin) throws SQLException;
+    void updatedCard(String numberCard, String pin);
 
     Account getCard(long numberCard);
 

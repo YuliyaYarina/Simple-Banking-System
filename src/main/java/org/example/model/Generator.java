@@ -4,20 +4,19 @@ import java.security.SecureRandom;
 
 public class Generator extends SecureRandom implements LuhnAlgorithm {
 
-    private final static String BIN = "400000";
-    private static int ACCOUNT_IDENTIFIER  = 0;
+    private static final String BIN = "400000";
+    private static int ACCOUNT_IDENTIFIER = 0;
 
-    private final static int PIN_LOWER_LIMIT_VALUES = 1000;
-    private final static int PIN_UPPER_LIMIT_VALUES = 9999;
+    private static final int PIN_LOWER_LIMIT_VALUES = 0;
+    private static final int PIN_UPPER_LIMIT_VALUES = 9999;
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     /**
      * Генерирует номер карты и инкремент ACCOUNT_IDENTIFIER.
      * @return номер карты.
      */
-    public Long numberCard(){
-        String numberCard = generatedLuhnAlgorithm(BIN +
-                String.format("%09d", ACCOUNT_IDENTIFIER));
-
+    public Long numberCard() {
+        String numberCard = generatedLuhnAlgorithm(BIN + String.format("%09d", ACCOUNT_IDENTIFIER));
         incrementAccountIdentifier(null);
         return Long.valueOf(numberCard);
     }
@@ -26,27 +25,30 @@ public class Generator extends SecureRandom implements LuhnAlgorithm {
      * Генерирует PIN для карты.
      * @return PIN.
      */
-    public synchronized String PINCard(){
-        return String.valueOf(new SecureRandom().nextInt(PIN_UPPER_LIMIT_VALUES - PIN_LOWER_LIMIT_VALUES + 1) + PIN_LOWER_LIMIT_VALUES);
+    public synchronized String PINCard() {
+        int pinValue = RANDOM.nextInt(PIN_UPPER_LIMIT_VALUES - PIN_LOWER_LIMIT_VALUES + 1) + PIN_LOWER_LIMIT_VALUES;
+        return String.format("%04d", pinValue);
     }
 
     /**
      * Метод получает крайний созданный номер карты, и увеличивает это число.
      */
-    public static synchronized void incrementAccountIdentifier(String lastCardNumber){
-        if(lastCardNumber != null){
+    public static synchronized void incrementAccountIdentifier(String lastCardNumber) {
+        if(lastCardNumber != null) {
             String[] cardNumberLast = new String[9];
             int t = 0;
-            for (int i = 6; i < 15;  i++){
-                cardNumberLast[t] =
-                        lastCardNumber.split("")[i];
+            for (int i = 6; i < 15; i++){
+                cardNumberLast[t] = lastCardNumber.split("")[i];
                 t++;
             }
             StringBuilder transformsToString = new StringBuilder();
-            for (String s : cardNumberLast) transformsToString.append(s);
+
+            for (String s : cardNumberLast) {
+                transformsToString.append(s);
+            }
             ACCOUNT_IDENTIFIER = Integer.parseInt(transformsToString.toString());
             ACCOUNT_IDENTIFIER++;
-        }else{
+        } else {
             ACCOUNT_IDENTIFIER++;
         }
     }
@@ -60,8 +62,8 @@ public class Generator extends SecureRandom implements LuhnAlgorithm {
      * @return номер карты, соответствующий методу луна
      */
     @Override
-    public synchronized String generatedLuhnAlgorithm(String numberCard){
-        int[] newNumberCard ;
+    public synchronized String generatedLuhnAlgorithm(String numberCard) {
+        int[] newNumberCard;
         String[] numberCards = numberCard.split("");
 
         newNumberCard = multipedOddDigitsBy2(numberCards);
@@ -71,7 +73,7 @@ public class Generator extends SecureRandom implements LuhnAlgorithm {
     }
 
     @Override
-    public int addAllNumbers(int[] numberCard){
+    public int addAllNumbers(int[] numberCard) {
         int sum = 0;
         for (int j : numberCard) {
             sum += j;
@@ -84,9 +86,9 @@ public class Generator extends SecureRandom implements LuhnAlgorithm {
     public int[] subtractNumbersOver9(int[] numberCard) {
         int[] newNumberCard = new int[15];
         for (int i = 0; i < numberCard.length; i++) {
-            if(numberCard[i] > 9) {
-                newNumberCard[i] =  numberCard[i] - 9;
-            }else {
+            if (numberCard[i] > 9) {
+                newNumberCard[i] = numberCard[i] - 9;
+            } else {
                 newNumberCard[i] = numberCard[i];
             }
         }
@@ -94,14 +96,14 @@ public class Generator extends SecureRandom implements LuhnAlgorithm {
     }
 
     @Override
-    public int[] multipedOddDigitsBy2(String[] numberCard){
+    public int[] multipedOddDigitsBy2(String[] numberCard) {
         int[] multipOddDigitsBy2 = new int[15];
 
-        for(int i = 0 ; i < numberCard.length; i++){
+        for (int i = 0 ; i < numberCard.length; i++) {
             int number = Integer.parseInt(numberCard[i]);
-            if(i % 2 == 0) {
+            if (i % 2 == 0) {
                 multipOddDigitsBy2[i] = number * 2;
-            }else {
+            } else {
                 multipOddDigitsBy2[i] = number;
             }
         }

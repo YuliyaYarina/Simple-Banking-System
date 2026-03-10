@@ -3,27 +3,22 @@ package org.example;
 import org.example.controller.AccountController;
 import org.example.except.NumberCardIsNotInDBException;
 
-import java.util.InputMismatchException;
 import java.util.Scanner;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+/**
+ * Консольная точка входа в приложение и обработчик пользовательского меню.
+ */
 public class Main {
 
-    private static final AccountController controller= new AccountController();
-    private static Scanner input;
-
-    {
-        input = new Scanner(System.in);
-    }
-
+    private static final AccountController controller = new AccountController();
+    private static final Scanner input = new Scanner(System.in);
 
     static void main() {
-        selectsAction();
+        selectAction();
     }
 
     /**
-     * Выводит на экран меню список действий.
+     * Печатает главное меню приложения.
      */
     static void printTheMenu() {
         System.out.println("""
@@ -35,119 +30,118 @@ public class Main {
     }
 
     /**
-     * Выводит на экран меню список действий в аккаунте.
+     * Печатает меню после успешного входа в аккаунт.
      */
     static void printTheMenuIntoAccount() {
         System.out.println("""
+                
                 1. Balance
                 2. Log out
                 0. Exit
                 """);
     }
-    /**
-     * Выводит на экран меню "Bye!".
-     */
+
     static void printTheMenuBye() {
         System.out.println("\nBye!");
     }
 
     /**
-     * По введенному номеру, выбирает действие.
+     * Главный цикл приложения. Читает действие пользователя и выполняет соответствующую операцию.
      */
-    static void selectsAction() {
+    static void selectAction() {
         boolean exit = false;
         while (!exit) {
             printTheMenu();
-            switch ((int)scan()) {
-                case 1:
-                    createAnAccount();
-                    break;
-                case 2:
-                    searchAccount();
-                    break;
-                case 0:
-                    input.close();
+            switch (scanInt()) {
+                case 1 -> createAnAccount();
+                case 2 -> searchAccount();
+                case 0 -> {
                     printTheMenuBye();
                     exit = true;
-                    break;
-                default:
-                    System.out.println("there is no such option, try again.");
+                }
+                default -> System.out.println("there is no such option, try again.");
             }
         }
+        input.close();
     }
 
     /**
-     * По введенному номеру, выбирает действие в аккаунте.
-     * @param account аккаунт.
-     */
-    private static void logIntoAccount(Long account) {
-        boolean exit = false;
-        while (!exit){
-            printTheMenuIntoAccount();
-            switch((int) scan()) {
-                case 1:
-                    System.out.println(controller.getBalance(account));
-                    break;
-                case 2:
-                    System.out.println("\n1You have successfully logged out!");
-                    break;
-                case 0:
-                    exit = true;
-                    break;
-                default:
-                    System.out.println("there is no such option, try again.");
-            }
-        }
-    }
-
-    /**
-     * Сканирует введенный номер.
+     * Цикл действий внутри авторизованного аккаунта.
      *
-     * @return введенный номер.
+     * @param account номер карты текущего аккаунта
      */
-    private static long scan() {
-        try {
-            input = new Scanner(System.in);
-            return input.nextLong();
-        } catch (NullPointerException e) {
-            System.out.println("Please enter a text, NullPointerException");
-            return scan();
-        } catch (InputMismatchException e) {
-            System.out.println("Please enter a text again" +
-                    "\n Исключение несоответствия входных данных");
-            return scan();
+    private static void logIntoAccount(long account) {
+        boolean exit = false;
+        while (!exit) {
+            printTheMenuIntoAccount();
+            switch(scanInt()) {
+                case 1 -> System.out.println(controller.getBalance(account));
+                case 2 -> {
+                    System.out.println("\nYou have successfully logged out!");
+                    exit = true;
+                }
+                case 0 -> {
+                    printTheMenuBye();
+                    System.exit(0);
+                }
+                default -> System.out.println("there is no such option, try again.");
+            }
         }
     }
 
     /**
-     * Создает аккаунт, выводит на печать.
+     * Считывает целое число из консоли с валидацией.
      */
-    private static void createAnAccount(){
+    private static int scanInt() {
+        while (!input.hasNextInt()) {
+            input.next();
+            System.out.println("Please enter a valid number.");
+        }
+        return input.nextInt();
+    }
+
+    /**
+     * Считывает long-число из консоли с валидацией.
+     */
+    private static long scanLong() {
+        while (!input.hasNextLong()) {
+            input.next();
+            System.out.println("Please enter a valid number.");
+        }
+        return input.nextLong();
+    }
+
+    /**
+     * Считывает один текстовый токен из консоли (используется для PIN).
+     */
+    private static String scanToken() {
+        return input.next();
+    }
+
+    private static void createAnAccount() {
         System.out.println(controller.createAccount());
     }
 
     /**
-     * Находит аккаунт.
+     * Выполняет вход в аккаунт по номеру карты и PIN.
      */
-    private static void searchAccount()  {
+    private static void searchAccount() {
         try {
             System.out.println("Enter your card number:");
-            long numberCard = scan();
+            long numberCard = scanLong();
             System.out.println("Enter your PIN:");
-            String PINCard = String.valueOf(scan());
+            String pinCard = scanToken();
 
-            Boolean account = controller.equalsPIN(numberCard, PINCard);
+            boolean accountExists = controller.equalsPIN(numberCard, pinCard);
 
-            if (!account) {
+            if (!accountExists) {
                 System.out.println("\nWrong card number or PIN!\n");
             } else {
                 System.out.println("\nYou have successfully logged in!\n");
                 logIntoAccount(numberCard);
             }
         } catch (NumberCardIsNotInDBException e) {
-//        throw new NumberCardIsNotInDBException("\n Номера карты: " + " нет в BD ");
-            String message = e.getMessage();
-            System.out.println(message);
+            System.out.println("\nWrong card number or PIN!\n");
         }
     }
 }
