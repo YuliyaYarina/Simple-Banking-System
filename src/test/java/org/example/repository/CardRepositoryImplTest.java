@@ -16,36 +16,36 @@ class CardRepositoryImplTest {
     }
 
     @Test
-    void updatedCardAndGetCardShouldPersistAndReadAccount() {
+    void saveCardAndFindCardShouldPersistAndReadAccount() {
         CardRepository repository = new CardRepositoryImpl();
         String cardNumber = String.valueOf(4000000000000000L + (System.nanoTime() % 1_000_000_000L));
-        String pin = "0123";
+        String pinHash = "testSalt:testHash";
 
-        repository.updatedCard(cardNumber, pin);
-        Account account = repository.getCard(Long.parseLong(cardNumber));
+        repository.saveCard(cardNumber, pinHash);
+        Account account = repository.findCard(cardNumber);
 
-        assertEquals(Long.parseLong(cardNumber), account.getCardNumber());
-        assertEquals(pin, account.getPin());
+        assertEquals(cardNumber, account.getCardNumber());
+        assertEquals(pinHash, account.getPin());
         assertEquals(0, account.getBalance());
     }
 
     @Test
-    void getCardShouldThrowWhenCardIsMissing() {
+    void findCardShouldThrowWhenCardIsMissing() {
         CardRepository repository = new CardRepositoryImpl();
 
-        assertThrows(NumberCardIsNotInDBException.class, () -> repository.getCard(4999999999999999L));
+        assertThrows(NumberCardIsNotInDBException.class, () -> repository.findCard("4999999999999999"));
     }
 
     @Test
-    void searchMaxNumberCardShouldReturnMaxInsertedNumber() {
+    void findMaxCardNumberShouldReturnMaxInsertedNumber() {
         CardRepository repository = new CardRepositoryImpl();
         long seed = System.nanoTime() % 100_000_000L;
         String low = String.valueOf(4999990000000000L + seed);
         String high = String.valueOf(4999990000000000L + seed + 1);
 
-        repository.updatedCard(low, "0001");
-        repository.updatedCard(high, "0002");
+        repository.saveCard(low, "h1");
+        repository.saveCard(high, "h2");
 
-        assertEquals(high, repository.searchMaxNumberCard());
+        assertEquals(high, repository.findMaxCardNumber());
     }
 }

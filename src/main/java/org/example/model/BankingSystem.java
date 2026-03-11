@@ -4,27 +4,27 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Класс реализует Singleton, и представляет банковскую систему с учетными записями клиентов.
+ * @deprecated В stage 2 используем БД как единственный источник данных.
+ * Этот класс изолирован от runtime-потока и оставлен только для обратной совместимости.
  */
-public class BankingSystem {
+@Deprecated
+public final class BankingSystem {
 
-    private static BankingSystem instance;
+    private static final BankingSystem INSTANCE = new BankingSystem();
+    private static final Map<String, Account> accounts = new ConcurrentHashMap<>();
 
-    private static final Map<Long, Account> accounts = new ConcurrentHashMap<>();
+    private BankingSystem() {
+    }
 
-    public synchronized BankingSystem getInstance(){
-        if(instance == null){
-            instance = new BankingSystem();
-
-            return instance;
-        } else return instance;
+    public static BankingSystem getInstance() {
+        return INSTANCE;
     }
 
     /**
      * Возвращает все банковские счета.
      * @return банковские счета
      */
-    public static Map<Long, Account> getAccounts(){
+    public static Map<String, Account> getAccounts(){
         return accounts;
     }
 
@@ -33,7 +33,7 @@ public class BankingSystem {
      * @param numberAccount номер банковского счета.
      * @return банковский счет.
      */
-    public static Account getAccount(Long numberAccount) throws Exception{
+    public static Account getAccount(String numberAccount) {
         return accounts.get(numberAccount);
     }
 
@@ -43,9 +43,7 @@ public class BankingSystem {
      * @param numberAccount номер банковского счета.
      * @param account       банковский счет.
      */
-    public static void
-
-    addAccount(Long numberAccount, Account account){
+    public static void addAccount(String numberAccount, Account account){
         accounts.put(numberAccount, account);
     }
 
@@ -54,10 +52,7 @@ public class BankingSystem {
      * @param numberAccount номер банковского счета.
      * @return true в случае если объект найден и удален.
      */
-    public static boolean removeAccount(Long numberAccount){
-        if(accounts.containsKey(numberAccount)) {
-            return accounts.remove(numberAccount, accounts.get(numberAccount));
-        }else
-            return false;
+    public static boolean removeAccount(String numberAccount){
+        return accounts.remove(numberAccount) != null;
     }
 }

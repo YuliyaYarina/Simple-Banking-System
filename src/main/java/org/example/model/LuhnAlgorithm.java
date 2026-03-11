@@ -4,17 +4,16 @@ public interface LuhnAlgorithm {
 
     /**
      * Метод пропускает номер сгенерированный номер карты(без последней цифры) через алгоритм Луна, и добавляет крайний номер карты, соответствующий алгоритму Луна.
-     * @param numberCard номер карты, без крайней цифры.
+     * @param numberCardWithoutCheckDigit номер карты, без крайней цифры.
      * @return номер карты соответствующий алгоритму Луна.
      */
-    String generatedLuhnAlgorithm(String numberCard);
-
+    String generateLuhnNumber(String numberCardWithoutCheckDigit);
     /**
      * Умножает нечетные числа в строке
      * @param numberCard первые 15 чисел номера карты
      * @return новый номер, с умноженными нечетными числами.
      */
-    int[] multipedOddDigitsBy2(String[] numberCard);
+    int[] multiplyOddDigitsByTwo(String[] numberCard);
 
     /**
      * Перебираем номер и из чисел >9 вычитаем 9.
@@ -28,5 +27,5 @@ public interface LuhnAlgorithm {
      * @param numberCard номер карты, без крайней цифры.
      * @return крайняя цифра номера карты.
      */
-    int addAllNumbers(int[] numberCard);
+    int calculateCheckDigit(int[] numberCard);
 }

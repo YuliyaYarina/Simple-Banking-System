@@ -2,31 +2,31 @@ package org.example.model;
 
 import java.security.SecureRandom;
 
-public class Generator extends SecureRandom implements LuhnAlgorithm {
+public class Generator implements LuhnAlgorithm {
 
     private static final String BIN = "400000";
-    private static int ACCOUNT_IDENTIFIER = 0;
+    private static int accountIdentifier = 0;
 
-    private static final int PIN_LOWER_LIMIT_VALUES = 0;
-    private static final int PIN_UPPER_LIMIT_VALUES = 9999;
+    private static final int PIN_MIN = 0;
+    private static final int PIN_MAX = 9999;
     private static final SecureRandom RANDOM = new SecureRandom();
 
     /**
      * Генерирует номер карты и инкремент ACCOUNT_IDENTIFIER.
      * @return номер карты.
      */
-    public Long numberCard() {
-        String numberCard = generatedLuhnAlgorithm(BIN + String.format("%09d", ACCOUNT_IDENTIFIER));
+    public synchronized String generateCardNumber() {
+        String cardNumber = generateLuhnNumber(BIN + String.format("%09d", accountIdentifier));
         incrementAccountIdentifier(null);
-        return Long.valueOf(numberCard);
+        return cardNumber;
     }
 
     /**
      * Генерирует PIN для карты.
      * @return PIN.
      */
-    public synchronized String PINCard() {
-        int pinValue = RANDOM.nextInt(PIN_UPPER_LIMIT_VALUES - PIN_LOWER_LIMIT_VALUES + 1) + PIN_LOWER_LIMIT_VALUES;
+    public synchronized String generatePin() {
+        int pinValue = RANDOM.nextInt(PIN_MAX - PIN_MIN + 1) + PIN_MIN;
         return String.format("%04d", pinValue);
     }
 
@@ -34,79 +34,52 @@ public class Generator extends SecureRandom implements LuhnAlgorithm {
      * Метод получает крайний созданный номер карты, и увеличивает это число.
      */
     public static synchronized void incrementAccountIdentifier(String lastCardNumber) {
-        if(lastCardNumber != null) {
-            String[] cardNumberLast = new String[9];
-            int t = 0;
-            for (int i = 6; i < 15; i++){
-                cardNumberLast[t] = lastCardNumber.split("")[i];
-                t++;
-            }
-            StringBuilder transformsToString = new StringBuilder();
-
-            for (String s : cardNumberLast) {
-                transformsToString.append(s);
-            }
-            ACCOUNT_IDENTIFIER = Integer.parseInt(transformsToString.toString());
-            ACCOUNT_IDENTIFIER++;
+        if (lastCardNumber != null) {
+            String identifier = lastCardNumber.substring(6, 15);
+            accountIdentifier = Integer.parseInt(identifier) + 1;
         } else {
-            ACCOUNT_IDENTIFIER++;
+            accountIdentifier++;
         }
     }
-
-
-    // методы луна нужно перенести в отдельный class
 
     /**
      * Получает строку, переносит в массив, и выполняет по очереди операции алгоритма Луна.
-     * @param numberCard номер карты, без крайней цифры.
+     * @param numberCardWithoutCheckDigit номер карты, без крайней цифры.
      * @return номер карты, соответствующий методу луна
      */
     @Override
-    public synchronized String generatedLuhnAlgorithm(String numberCard) {
-        int[] newNumberCard;
-        String[] numberCards = numberCard.split("");
-
-        newNumberCard = multipedOddDigitsBy2(numberCards);
-        newNumberCard = subtractNumbersOver9(newNumberCard);
-
-        return numberCard + addAllNumbers(newNumberCard);
+    public String generateLuhnNumber(String numberCardWithoutCheckDigit) {
+        int[] digits = multiplyOddDigitsByTwo(numberCardWithoutCheckDigit.split(""));
+        digits = subtractNumbersOver9(digits);
+        return numberCardWithoutCheckDigit + calculateCheckDigit(digits);
     }
 
     @Override
-    public int addAllNumbers(int[] numberCard) {
+    public int calculateCheckDigit(int[] numberCard) {
         int sum = 0;
-        for (int j : numberCard) {
-            sum += j;
+        for (int digit : numberCard) {
+            sum += digit;
         }
-        sum = sum % 10;
-        return sum != 0 ? 10 - sum : 0;
+        int mod = sum % 10;
+        return mod == 0 ? 0 : 10 - mod;
     }
 
     @Override
     public int[] subtractNumbersOver9(int[] numberCard) {
-        int[] newNumberCard = new int[15];
+        int[] transformed = new int[numberCard.length];
         for (int i = 0; i < numberCard.length; i++) {
-            if (numberCard[i] > 9) {
-                newNumberCard[i] = numberCard[i] - 9;
-            } else {
-                newNumberCard[i] = numberCard[i];
-            }
+            transformed[i] = numberCard[i] > 9 ? numberCard[i] - 9 : numberCard[i];
         }
-        return newNumberCard;
+        return transformed;
     }
 
     @Override
-    public int[] multipedOddDigitsBy2(String[] numberCard) {
-        int[] multipOddDigitsBy2 = new int[15];
-
-        for (int i = 0 ; i < numberCard.length; i++) {
+    public int[] multiplyOddDigitsByTwo(String[] numberCard) {
+        int[] multiplied = new int[numberCard.length];
+        for (int i = 0; i < numberCard.length; i++) {
             int number = Integer.parseInt(numberCard[i]);
-            if (i % 2 == 0) {
-                multipOddDigitsBy2[i] = number * 2;
-            } else {
-                multipOddDigitsBy2[i] = number;
-            }
+            multiplied[i] = i % 2 == 0 ? number * 2 : number;
         }
-        return multipOddDigitsBy2;
+        return multiplied;
     }
 }

@@ -6,28 +6,29 @@ import org.example.service.serviceImpl.AccountServiceImpl;
 
 public class AccountController {
 
-    private final AccountService accountService = new AccountServiceImpl();
+    private final AccountService accountService;
+
+    public AccountController() {
+        this(new AccountServiceImpl());
+    }
+
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
+    }
 
     public String createAccount() {
         return accountService.createAccount();
     }
 
-    /**
-     * Сравнивает PIN.
-     * @param numberCard номер
-     * @param PINCard PIN
-     * @return true или false в зависимости от результата
-     */
-    public Boolean equalsPIN(long numberCard, String PINCard) {
-            return accountService.logAccountAnCardNumber(numberCard, PINCard);
+    public boolean isPinValid(String cardNumber, String pin) {
+        return accountService.loginByCardNumber(cardNumber, pin);
     }
 
     /**
      * Выводит баланс аккаунта.
-     * @param account аккаунт
      * @return String баланс аккаунта.
      */
-    public String getBalance(long account) {
-        return accountService.getBalance(account);
+    public String getBalance(String cardNumber) {
+        return accountService.getBalance(cardNumber);
     }
 }

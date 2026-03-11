@@ -4,37 +4,50 @@ import org.example.model.Account;
 import org.example.model.Generator;
 import org.example.repository.CardRepository;
 import org.example.repository.CardRepositoryImpl;
+import org.example.security.PinHasher;
 import org.example.service.AccountService;
 
 public class AccountServiceImpl implements AccountService {
 
-    private final CardRepository cardRepository = new CardRepositoryImpl();
-    private final Generator generator = new Generator();
+    private final CardRepository cardRepository;
+    private final Generator generator;
+
+    public AccountServiceImpl() {
+        this(new CardRepositoryImpl(), new Generator());
+    }
+
+    public AccountServiceImpl(CardRepository cardRepository, Generator generator) {
+        this.cardRepository = cardRepository;
+        this.generator = generator;
+    }
 
     @Override
     public String createAccount() {
-        String lastCardNumber = cardRepository.searchMaxNumberCard();
+        String lastCardNumber = cardRepository.findMaxCardNumber();
         Generator.incrementAccountIdentifier(lastCardNumber);
 
-        Account account = new Account(generator.numberCard(), generator.PINCard());
-        cardRepository.updatedCard(String.valueOf(account.getCardNumber()), account.getPin());
+        String cardNumber = generator.generateCardNumber();
+        String pin = generator.generatePin();
+        String pinHash = PinHasher.hash(pin);
+
+        cardRepository.saveCard(cardNumber, pinHash);
 
         return "\nYour card has been created\n"
                 + "Your card number:\n"
-                + account.getCardNumber()
+                + cardNumber
                 + "\nYour card PIN:\n"
-                + account.getPin();
+                + pin;
     }
 
     @Override
-    public Boolean logAccountAnCardNumber(long accountNumber, String PINCard) {
-        Account account = cardRepository.getCard(accountNumber);
-        return PINCard.equals(account.getPin());
+    public boolean loginByCardNumber(String cardNumber, String pin) {
+        Account account = cardRepository.findCard(cardNumber);
+        return PinHasher.verify(pin, account.getPin());
     }
 
     @Override
-    public String getBalance(long numberCard) {
-        Account account = cardRepository.getCard(numberCard);
+    public String getBalance(String cardNumber) {
+        Account account = cardRepository.findCard(cardNumber);
         return "\nBalance: " + account.getBalance();
     }
 }

@@ -2,15 +2,14 @@ package org.example.repository;
 
 import org.example.model.Account;
 
-import java.sql.SQLException;
 
 public interface CardRepository {
 
-    void updatedCard(String numberCard, String pin);
+    void saveCard(String numberCard, String pinHash);
 
-    Account getCard(long numberCard);
+    Account findCard(String numberCard);
 
     String getAccounts();
 
-    String searchMaxNumberCard();
+    String findMaxCardNumber();
 }

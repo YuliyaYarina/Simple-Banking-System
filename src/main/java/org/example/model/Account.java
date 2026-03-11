@@ -2,43 +2,27 @@ package org.example.model;
 
 import java.util.Objects;
 /**
- * Представляет банковский счет с уникальным номером карты, ПИН-кодом и балансом.
+ * Представляет банковский счет с номером карты, PIN (или его хешем) и балансом.
  */
 public class Account {
-    /**
-     * Уникальный номер карты.
-     */
-    private final long cardNumber;
 
-    /**
-     * Личный идентификационный номер (ПИН-код) для счета.
-     */
-    private final String pin;
-
-    /**
-     * Текущий баланс счета.
-     */
-    private long balance;
-
-    /**
-     * Начальный баланс для нового счета, который равен нулю.
-     */
     private final static long ZERO_BALANCE = 0;
 
-    /**
-     * Создает новый счет случайно сгенерированным номером карты и ПИН-кодом, и начальным балансом равным нулю.
-     */
-    public Account(Long numberCard, String pin) {
-        this.cardNumber = numberCard;
+    private final String cardNumber;
+    private final String pin;
+    private long balance;
+
+    public Account(String cardNumber, String pin) {
+        this.cardNumber = cardNumber;
         this.pin = pin;
         this.balance = ZERO_BALANCE;
     }
 
     /**
-     * Возвращает уникальный номер карты счета.
+     * Возвращает уникальный номер карты.
      * @return номер карты
      */
-    public long getCardNumber() {
+    public String getCardNumber() {
         return cardNumber;
     }
 
@@ -66,10 +50,6 @@ public class Account {
         this.balance = balance;
     }
 
-    public boolean isPinCorrect(String pinToTest){
-        return this.pin.equals(pinToTest);
-    }
-
     /**
      * Проверяет, равен ли этот счет указанному объекту.
      * Два счета считаются равными, если у них одинаковый номер карты и ПИН-код.
@@ -78,22 +58,15 @@ public class Account {
      */
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Account account = (Account) o;
-        return Objects.equals(cardNumber, account.cardNumber) && Objects.equals(pin, account.pin);
+        if (this == o) return true;
+        if (!(o instanceof Account account)) return false;
+        return balance == account.balance
+                && Objects.equals(cardNumber, account.cardNumber)
+                && Objects.equals(pin, account.pin);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cardNumber, pin);
-    }
-
-    @Override
-    public String toString() {
-        return "Account{" +
-                "numberCard='" + cardNumber + '\'' +
-                ", PINCard=" + pin +
-                ", balance=" + balance +
-                '}';
+        return Objects.hash(cardNumber, pin, balance);
     }
 }
