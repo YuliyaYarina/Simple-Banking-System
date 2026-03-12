@@ -1,5 +1,6 @@
 package org.example.service.serviceImpl;
 
+import org.example.except.NumberCardIsNotInDBException;
 import org.example.model.Account;
 import org.example.model.Generator;
 import org.example.repository.CardRepository;
@@ -40,14 +41,32 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public boolean loginByCardNumber(String cardNumber, String pin) {
+    public boolean loginByCardNumber(String cardNumber, String pin) throws NumberCardIsNotInDBException {
         Account account = cardRepository.findCard(cardNumber);
-        return PinHasher.verify(pin, account.getPin());
+        return account != null && PinHasher.verify(pin, account.getPin());
     }
 
     @Override
     public String getBalance(String cardNumber) {
         Account account = cardRepository.findCard(cardNumber);
         return "\nBalance: " + account.getBalance();
+    }
+
+    @Override
+    public boolean deleteAccount(String cardNumber) {
+        try {
+            boolean deleted = cardRepository.deleteAccount(cardNumber);
+            if(deleted){
+                try {
+                    Account account = cardRepository.findCard(cardNumber);
+                    return account == null;
+                } catch (NumberCardIsNotInDBException e) {
+                    e.getMessage(); // нужно добавить комментарии оповещение
+                    return true;
+                }
+            } else return false;
+        } catch (RuntimeException e) {
+            return false;
+        }
     }
 }

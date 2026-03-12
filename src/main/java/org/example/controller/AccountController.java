@@ -20,7 +20,7 @@ public class AccountController {
         return accountService.createAccount();
     }
 
-    public boolean isPinValid(String cardNumber, String pin) {
+    public boolean isPinValid(String cardNumber, String pin) throws NullPointerException{
         return accountService.loginByCardNumber(cardNumber, pin);
     }
 
@@ -30,5 +30,9 @@ public class AccountController {
      */
     public String getBalance(String cardNumber) {
         return accountService.getBalance(cardNumber);
+    }
+
+    public boolean deleteAccount(String cardNumber) {
+        return accountService.deleteAccount(cardNumber);
     }
 }

@@ -56,7 +56,7 @@ public class CardRepositoryImpl implements CardRepository {
      * Возвращает аккаунт по номеру карты или бросает исключение, если запись не найдена.
      */
     @Override
-    public Account findCard(String numberCard) {
+    public Account findCard(String numberCard) throws NumberCardIsNotInDBException {
         String selectSql = "SELECT number, pin, balance FROM card WHERE number = ?";
         try (Connection con = dataSource.getConnection();
              PreparedStatement statement = con.prepareStatement(selectSql)) {
@@ -65,7 +65,7 @@ public class CardRepositoryImpl implements CardRepository {
 
             try (ResultSet accounts = statement.executeQuery()) {
                 if (!accounts.next()) {
-                    throw new NumberCardIsNotInDBException("Card is not found");
+                    throw new NumberCardIsNotInDBException("\nCard is not found");
                 }
 
                 String number = accounts.getString("number");
@@ -77,7 +77,8 @@ public class CardRepositoryImpl implements CardRepository {
                 return account;
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to read card", e);
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -123,4 +124,33 @@ public class CardRepositoryImpl implements CardRepository {
                 throw new RuntimeException("Failed to get max card number", e);
         }
     }
+
+    @Override
+    public boolean deleteAccount(String cardNumber) {
+        String  deleteSql = "DELETE FROM card WHERE number = ?";
+        try (Connection con = dataSource.getConnection()) {
+            PreparedStatement statement = con.prepareStatement(deleteSql);
+            statement.setString(1, cardNumber);
+
+            int i = statement.executeUpdate();
+
+            return i > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to delete account", e);
+        }
+    }
 }
+// try (ResultSet accounts = statement.executeQuery()) {
+//                if (!accounts.next()) {
+//                    throw new NumberCardIsNotInDBException("Card is not found");
+//                }
+//
+//                String number = accounts.getString("number");
+//                String pin = accounts.getString("pin");
+//                long balance = accounts.getLong("balance");
+//
+//                Account account = new Account(number, pin);
+//                account.setBalance(balance);
+//                return account;
+//            }

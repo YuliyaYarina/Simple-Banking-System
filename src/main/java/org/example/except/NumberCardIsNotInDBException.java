@@ -7,4 +7,8 @@ public class NumberCardIsNotInDBException extends RuntimeException {
 
     public NumberCardIsNotInDBException() {
     }
+
+    public void getMessage(String cardIsNotFound) {
+        System.err.println("Card Not Found");
+    }
 }

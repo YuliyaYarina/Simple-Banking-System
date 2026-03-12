@@ -6,4 +6,6 @@ public interface AccountService {
     boolean loginByCardNumber(String cardNumber, String pin);
 
     String getBalance(String cardNumber);
+
+    boolean deleteAccount(String cardNumber);
 }
