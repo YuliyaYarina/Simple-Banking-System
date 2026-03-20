@@ -2,7 +2,6 @@ package org.example.repository;
 
 import org.example.model.Account;
 
-
 public interface CardRepository {
 
     void saveCard(String numberCard, String pinHash);
@@ -20,4 +19,6 @@ public interface CardRepository {
     long getBalance(String cardNumber);
 
     boolean setBalance(String cardNumber, String money);
+
+    boolean transferMoney(String fromCardNumber, String toCardNumber, long amount);
 }

@@ -115,7 +115,8 @@ public class ConsoleApplication {
                 case ADD_INCOME -> addIncome(cardNumber);
                 case DO_TRANSFER -> doTransfer(cardNumber);
                 case CLOSE_ACCOUNT -> {
-                    System.out.println(controller.deleteAccount(cardNumber));
+                    boolean deleted = controller.deleteAccount(cardNumber);
+                    System.out.println(deleted ? "\nThe account has been closed!" : "\nFailed to close account.");
                     exit = true;
                 }
                 case LOG_OUT -> {

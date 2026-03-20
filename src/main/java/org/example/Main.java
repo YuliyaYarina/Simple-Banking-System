@@ -10,7 +10,7 @@ import java.util.Scanner;
  */
 public class Main {
 
-    static void main(String[] args) {
+    public static void main(String[] args) {
         AccountController controller = new AccountController();
         try (Scanner scanner = new Scanner(System.in)) {
             ConsoleApplication app = new ConsoleApplication(controller, scanner);

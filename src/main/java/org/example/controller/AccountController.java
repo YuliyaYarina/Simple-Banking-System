@@ -9,23 +9,19 @@ import org.example.service.LuhnAlgorithmService;
 import org.example.service.serviceImpl.AccountServiceImpl;
 import org.example.service.serviceImpl.LuhnAlgorithmServiceImpl;
 
-
 public class AccountController {
 
-    private final AccountService accountService =  new AccountServiceImpl();
-    private final LuhnAlgorithmService luhnAlgorithmService =  new LuhnAlgorithmServiceImpl();
+    private final AccountService accountService = new AccountServiceImpl();
+    private final LuhnAlgorithmService luhnAlgorithmService = new LuhnAlgorithmServiceImpl();
 
     public String createAccount() {
         return accountService.createAccount();
     }
 
-    public boolean isPinValid(String cardNumber, String pin) throws NullPointerException {
+    public boolean isPinValid(String cardNumber, String pin) {
         return accountService.isPinValid(cardNumber, pin);
     }
 
-    /**
-     * Выводит баланс аккаунта.
-     */
     public void getBalance(String cardNumber) {
         System.out.println(accountService.getBalance(cardNumber));
     }
@@ -40,18 +36,23 @@ public class AccountController {
 
     public boolean isCardNumberValid(String cardNumber, String cardNumberDoTransfer) {
         try {
-            if (cardNumberDoTransfer.equals(cardNumber)) throw new TransferToSameAccountException();
-            if (!luhnAlgorithmService.generateLuhnNumber(cardNumber).equals(cardNumber)) throw new RecipientCardNumberNotPassLunaAlgorithmCheckException();
+            if (cardNumberDoTransfer.equals(cardNumber)) {
+                throw new TransferToSameAccountException();
+            }
+            if (!luhnAlgorithmService.generateLuhnNumber(cardNumberDoTransfer).equals(cardNumberDoTransfer)) {
+                throw new RecipientCardNumberNotPassLunaAlgorithmCheckException();
+            }
 
-            return accountService.isCardNumberValid(cardNumber);
-        } catch (RecipientCardNumberNotPassLunaAlgorithmCheckException | RecipientCardNumberNotExistException |
-                 TransferToSameAccountException e) {
+            return accountService.isCardNumberValid(cardNumberDoTransfer);
+        } catch (RecipientCardNumberNotPassLunaAlgorithmCheckException
+                 | RecipientCardNumberNotExistException
+                 | TransferToSameAccountException e) {
             System.out.println(e.getMessage());
             return false;
         }
     }
 
-    public boolean doTransfer(String cardNumber,String cardNumberDoTransfer, String money) {
+    public boolean doTransfer(String cardNumber, String cardNumberDoTransfer, String money) {
         try {
             return accountService.doTransfer(cardNumber, cardNumberDoTransfer, money);
         } catch (NotEnoughMoneyInAccountException e) {

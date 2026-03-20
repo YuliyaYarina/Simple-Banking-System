@@ -1,5 +1,6 @@
 package org.example.service.serviceImpl;
 
+import org.example.except.NotEnoughMoneyInAccountException;
 import org.example.except.RecipientCardNumberNotExistException;
 import org.example.model.Account;
 import org.example.model.Generator;
@@ -37,6 +38,37 @@ class AccountServiceImplTest {
         assertFalse(service.isPinValid(card, "9999"));
     }
 
+    @Test
+    void doTransferShouldMoveMoneyBetweenAccounts() {
+        InMemoryCardRepository repository = new InMemoryCardRepository();
+        String fromCard = "4000001234567890";
+        String toCard = "4000001234567899";
+        repository.saveCard(fromCard, PinHasher.hash("1111"));
+        repository.saveCard(toCard, PinHasher.hash("2222"));
+        repository.addIncome("1000", fromCard);
+
+        AccountService service = new AccountServiceImpl(repository, new Generator());
+
+        assertTrue(service.doTransfer(fromCard, toCard, "600"));
+        assertEquals(400, repository.getBalance(fromCard));
+        assertEquals(600, repository.getBalance(toCard));
+    }
+
+    @Test
+    void doTransferShouldThrowWhenBalanceIsInsufficient() {
+        InMemoryCardRepository repository = new InMemoryCardRepository();
+        String fromCard = "4000001234567890";
+        String toCard = "4000001234567899";
+        repository.saveCard(fromCard, PinHasher.hash("1111"));
+        repository.saveCard(toCard, PinHasher.hash("2222"));
+        repository.addIncome("100", fromCard);
+
+        AccountService service = new AccountServiceImpl(repository, new Generator());
+
+        assertThrows(NotEnoughMoneyInAccountException.class,
+                () -> service.doTransfer(fromCard, toCard, "600"));
+    }
+
     private static class InMemoryCardRepository implements CardRepository {
 
         private final Map<String, Account> accounts = new HashMap<>();
@@ -47,7 +79,7 @@ class AccountServiceImplTest {
         }
 
         @Override
-        public Account findCard(String numberCard) throws RecipientCardNumberNotExistException {
+        public Account findCard(String numberCard) {
             Account account = accounts.get(numberCard);
             if (account == null) {
                 throw new RecipientCardNumberNotExistException();
@@ -67,32 +99,40 @@ class AccountServiceImplTest {
 
         @Override
         public boolean deleteAccount(String cardNumber) {
-            accounts.remove(cardNumber);
-            return accounts.containsKey(cardNumber);
+            return accounts.remove(cardNumber) != null;
         }
 
         @Override
-        public boolean addIncome(String income, String cardNumber) {
-            try {
-                accounts.get(cardNumber).setBalance(Long.parseLong(accounts.get(cardNumber).getBalance() + income));
-                return true;
-            } catch (RuntimeException e){
-                return false;
-            }
+        public boolean addIncome(String income, String cardNumber) {Account account = findCard(cardNumber);
+            account.setBalance(account.getBalance() + Long.parseLong(income));
+            return true;
         }
 
         @Override
         public long getBalance(String cardNumber) {
-            return accounts.get(cardNumber).getBalance();
+            return findCard(cardNumber).getBalance();
         }
 
         @Override
-        public boolean setBalance(String cardNumber, String money) {
-            if(accounts.get(cardNumber).getBalance() >= money.length()) {
-                accounts.get(cardNumber).setBalance(accounts.get(cardNumber).getBalance() - Long.parseLong(money));
-                return true;
+        public boolean setBalance(String cardNumber, String money) {Account account = findCard(cardNumber);
+            long amount = Long.parseLong(money);
+            if (account.getBalance() < amount) {
+                return false;
             }
-            return false;
+            account.setBalance(account.getBalance() - amount);
+            return true;
+        }
+
+        @Override
+        public boolean transferMoney(String fromCardNumber, String toCardNumber, long amount) {
+            Account from = findCard(fromCardNumber);
+            Account to = findCard(toCardNumber);
+            if (from.getBalance() < amount) {
+                return false;
+            }
+            from.setBalance(from.getBalance() - amount);
+            to.setBalance(to.getBalance() + amount);
+            return true;
         }
     }
 }
