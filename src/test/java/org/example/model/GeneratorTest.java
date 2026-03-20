@@ -1,5 +1,7 @@
 package org.example.model;
 
+import org.example.service.LuhnAlgorithmService;
+import org.example.service.serviceImpl.LuhnAlgorithmServiceImpl;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -11,7 +13,7 @@ class GeneratorTest {
 
     private static final String LUHN_BASE_NUMBER = "400000844943340";
 
-    private final LuhnAlgorithm luhnAlgorithm = new Generator();
+    private final LuhnAlgorithmService luhnAlgorithm = new LuhnAlgorithmServiceImpl();
 
     @Test
     void generateCardNumberShouldProduce16DigitNumber() {

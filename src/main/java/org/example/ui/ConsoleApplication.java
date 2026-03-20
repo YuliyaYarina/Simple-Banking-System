@@ -1,7 +1,7 @@
 package org.example.ui;
 
 import org.example.controller.AccountController;
-import org.example.except.NumberCardIsNotInDBException;
+import org.example.except.RecipientCardNumberNotExistException;
 
 import java.util.Scanner;
 
@@ -76,8 +76,33 @@ public class ConsoleApplication {
                 System.out.println("\nYou have successfully logged in!");
                 runAccountMenu(cardNumber);
             }
-        } catch (NumberCardIsNotInDBException e) {
+        } catch (RecipientCardNumberNotExistException e) {
             System.out.println(e.getMessage());
+        }
+    }
+
+    private void addIncome(String cardNumber) {
+            System.out.println("\nEnter income:");
+            String income = scanToken();
+
+            boolean addIncome = controller.addIncome(income, cardNumber);
+            if (addIncome) System.out.println("\nIncome was added!");
+    }
+
+    private void doTransfer(String cardNumber) {
+            System.out.println("""
+                    
+                    Transfer
+                    Enter card number:""");
+        String cardNumberDoTransfer = scanToken();
+
+        boolean checkCardNumber = controller.isCardNumberValid(cardNumber, cardNumberDoTransfer);
+        if (checkCardNumber) {
+            System.out.println("Enter how much money you want to transfer:");
+            String money = scanToken();
+
+            boolean doTransfer =  controller.doTransfer(cardNumber, cardNumberDoTransfer, money);
+            if(doTransfer) System.out.println("Success!");
         }
     }
 
@@ -86,11 +111,11 @@ public class ConsoleApplication {
         while (!exit) {
             printAccountMenu();
             switch (scanInt()) {
-                case BALANCE -> System.out.println(controller.getBalance(cardNumber));
-//                case ADD_INCOME -> ;
-//                case DO_TRANSFER -> ;
+                case BALANCE -> controller.getBalance(cardNumber);
+                case ADD_INCOME -> addIncome(cardNumber);
+                case DO_TRANSFER -> doTransfer(cardNumber);
                 case CLOSE_ACCOUNT -> {
-                    System.out.println(controller.deleteAccount(cardNumber) ? "\nThe account has been closed!" : "\n Something went wrong, try again.");
+                    System.out.println(controller.deleteAccount(cardNumber));
                     exit = true;
                 }
                 case LOG_OUT -> {

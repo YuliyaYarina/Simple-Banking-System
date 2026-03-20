@@ -14,4 +14,10 @@ public interface CardRepository {
     String findMaxCardNumber();
 
     boolean deleteAccount(String cardNumber);
+
+    boolean addIncome(String income, String cardNumber);
+
+    long getBalance(String cardNumber);
+
+    boolean setBalance(String cardNumber, String money);
 }

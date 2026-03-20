@@ -1,6 +1,6 @@
 package org.example.repository;
 
-import org.example.except.NumberCardIsNotInDBException;
+import org.example.except.RecipientCardNumberNotExistException;
 import org.example.model.Account;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ class CardRepositoryImplTest {
     void findCardShouldThrowWhenCardIsMissing() {
         CardRepository repository = new CardRepositoryImpl();
 
-        assertThrows(NumberCardIsNotInDBException.class, () -> repository.findCard("4999999999999999"));
+        assertThrows(RecipientCardNumberNotExistException.class, () -> repository.findCard("4999999999999999"));
     }
 
     @Test
@@ -47,5 +47,20 @@ class CardRepositoryImplTest {
         repository.saveCard(high, "h2");
 
         assertEquals(high, repository.findMaxCardNumber());
+    }
+
+    @Test
+    void deleteAccountShouldDeletedAccountAndReturnBoolean() {
+        CardRepository repository = new CardRepositoryImpl();
+        String cardNumber = String.valueOf(4000000000000000L + (System.nanoTime() % 1_000_000_000L));
+        String pinHash = "testSalt:testHash";
+        repository.saveCard(cardNumber, pinHash);
+
+        boolean result = repository.deleteAccount(cardNumber);
+
+        assertTrue(result);
+        assertThrows(RecipientCardNumberNotExistException.class, ()  -> {
+            repository.findCard(cardNumber);
+        });
     }
 }

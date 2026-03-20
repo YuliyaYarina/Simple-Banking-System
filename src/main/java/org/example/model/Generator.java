@@ -1,8 +1,11 @@
 package org.example.model;
 
+import org.example.service.LuhnAlgorithmService;
+import org.example.service.serviceImpl.LuhnAlgorithmServiceImpl;
+
 import java.security.SecureRandom;
 
-public class Generator implements LuhnAlgorithm {
+public class Generator {
 
     private static final String BIN = "400000";
     private static int accountIdentifier = 0;
@@ -11,12 +14,14 @@ public class Generator implements LuhnAlgorithm {
     private static final int PIN_MAX = 9999;
     private static final SecureRandom RANDOM = new SecureRandom();
 
+    private final LuhnAlgorithmService luhnAlgorithmService = new LuhnAlgorithmServiceImpl();
+
     /**
      * Генерирует номер карты и инкремент ACCOUNT_IDENTIFIER.
      * @return номер карты.
      */
     public synchronized String generateCardNumber() {
-        String cardNumber = generateLuhnNumber(BIN + String.format("%09d", accountIdentifier));
+        String cardNumber = luhnAlgorithmService.generateLuhnNumber(BIN + String.format("%09d", accountIdentifier));
         incrementAccountIdentifier(null);
         return cardNumber;
     }
@@ -40,46 +45,5 @@ public class Generator implements LuhnAlgorithm {
         } else {
             accountIdentifier++;
         }
-    }
-
-    /**
-     * Получает строку, переносит в массив, и выполняет по очереди операции алгоритма Луна.
-     * @param numberCardWithoutCheckDigit номер карты, без крайней цифры.
-     * @return номер карты, соответствующий методу луна
-     */
-    @Override
-    public String generateLuhnNumber(String numberCardWithoutCheckDigit) {
-        int[] digits = multiplyOddDigitsByTwo(numberCardWithoutCheckDigit.split(""));
-        digits = subtractNumbersOver9(digits);
-        return numberCardWithoutCheckDigit + calculateCheckDigit(digits);
-    }
-
-    @Override
-    public int calculateCheckDigit(int[] numberCard) {
-        int sum = 0;
-        for (int digit : numberCard) {
-            sum += digit;
-        }
-        int mod = sum % 10;
-        return mod == 0 ? 0 : 10 - mod;
-    }
-
-    @Override
-    public int[] subtractNumbersOver9(int[] numberCard) {
-        int[] transformed = new int[numberCard.length];
-        for (int i = 0; i < numberCard.length; i++) {
-            transformed[i] = numberCard[i] > 9 ? numberCard[i] - 9 : numberCard[i];
-        }
-        return transformed;
-    }
-
-    @Override
-    public int[] multiplyOddDigitsByTwo(String[] numberCard) {
-        int[] multiplied = new int[numberCard.length];
-        for (int i = 0; i < numberCard.length; i++) {
-            int number = Integer.parseInt(numberCard[i]);
-            multiplied[i] = i % 2 == 0 ? number * 2 : number;
-        }
-        return multiplied;
     }
 }
