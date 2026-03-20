@@ -1,13 +1,21 @@
-package org.example.model;
+package org.example.service;
 
-public interface LuhnAlgorithm {
+public interface LuhnAlgorithmService {
 
     /**
      * Метод пропускает номер сгенерированный номер карты(без последней цифры) через алгоритм Луна, и добавляет крайний номер карты, соответствующий алгоритму Луна.
-     * @param numberCardWithoutCheckDigit номер карты, без крайней цифры.
+     * @param numberCard номер карты.
      * @return номер карты соответствующий алгоритму Луна.
      */
-    String generateLuhnNumber(String numberCardWithoutCheckDigit);
+    String generateLuhnNumber(String numberCard);
+
+    /**
+     * Убирает крайнюю цифру
+     * @param cardNumber номер карты.
+     * @return номер карты, без крайней цифры.
+     */
+    String discardsLastDigitOfCardNumber(String cardNumber);
+
     /**
      * Умножает нечетные числа в строке
      * @param numberCard первые 15 чисел номера карты

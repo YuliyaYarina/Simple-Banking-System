@@ -1,5 +1,6 @@
 package org.example.service.serviceImpl;
 
+import org.example.except.*;
 import org.example.model.Account;
 import org.example.model.Generator;
 import org.example.repository.CardRepository;
@@ -7,18 +8,10 @@ import org.example.repository.CardRepositoryImpl;
 import org.example.security.PinHasher;
 import org.example.service.AccountService;
 
-public class AccountServiceImpl implements AccountService {
-
-    private final CardRepository cardRepository;
-    private final Generator generator;
+public record AccountServiceImpl(CardRepository cardRepository, Generator generator) implements AccountService {
 
     public AccountServiceImpl() {
         this(new CardRepositoryImpl(), new Generator());
-    }
-
-    public AccountServiceImpl(CardRepository cardRepository, Generator generator) {
-        this.cardRepository = cardRepository;
-        this.generator = generator;
     }
 
     @Override
@@ -40,14 +33,47 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public boolean loginByCardNumber(String cardNumber, String pin) {
+    public boolean isPinValid(String cardNumber, String pin) {
         Account account = cardRepository.findCard(cardNumber);
         return PinHasher.verify(pin, account.getPin());
     }
 
     @Override
     public String getBalance(String cardNumber) {
-        Account account = cardRepository.findCard(cardNumber);
-        return "\nBalance: " + account.getBalance();
+        return "\nBalance: " + cardRepository.getBalance(cardNumber);
+    }
+
+    @Override
+    public boolean deleteAccount(String cardNumber) {
+        return cardRepository.deleteAccount(cardNumber);
+    }
+
+    @Override
+    public boolean addIncome(String income, String cardNumber) {
+        long amount = Long.parseLong(income);
+        if (amount < 0) {
+            return false;
+        }
+        return cardRepository.addIncome(income, cardNumber);
+    }
+
+    @Override
+    public boolean isCardNumberValid(String cardNumber) {
+        return cardRepository.findCard(cardNumber) != null;
+    }
+
+    @Override
+    public boolean doTransfer(String cardNumber, String cardNumberDoTransfer, String money)
+            throws NotEnoughMoneyInAccountException {
+        long amount = Long.parseLong(money);
+        if (amount <= 0) {
+            return false;
+        }
+
+        boolean doTransfer = cardRepository.transferMoney(cardNumber, cardNumberDoTransfer, amount);
+        if (!doTransfer) {
+            throw new NotEnoughMoneyInAccountException();
+        }
+        return true;
     }
 }

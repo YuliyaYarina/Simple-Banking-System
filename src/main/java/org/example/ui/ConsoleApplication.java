@@ -1,13 +1,20 @@
 package org.example.ui;
 
 import org.example.controller.AccountController;
-import org.example.except.NumberCardIsNotInDBException;
+import org.example.except.RecipientCardNumberNotExistException;
 
 import java.util.Scanner;
 
 public class ConsoleApplication {
     private final AccountController controller;
     private final Scanner input;
+
+    private static final int BALANCE = 1;
+    private static final int ADD_INCOME = 2;
+    private static final int DO_TRANSFER = 3;
+    private static final int CLOSE_ACCOUNT = 4;
+    private static final int LOG_OUT = 5;
+    private static final int EXIT = 0;
 
     public ConsoleApplication(AccountController controller, Scanner input) {
         this.controller = controller;
@@ -43,7 +50,10 @@ public class ConsoleApplication {
         System.out.println("""
                 
                 1. Balance
-                2. Log out
+                2. Add income
+                3. Do transfer
+                4. Close account
+                5. Log out
                 0. Exit
                 """);
     }
@@ -53,22 +63,46 @@ public class ConsoleApplication {
     }
 
     private void login() {
-        try {
             System.out.println("Enter your card number:");
             String cardNumber = scanToken();
             System.out.println("Enter your PIN:");
             String pin = scanToken();
 
+        try {
             boolean accountExists = controller.isPinValid(cardNumber, pin);
             if (!accountExists) {
-                System.out.println("\nWrong card number or PIN!\n");
-                return;
+                System.out.println("\nWrong card number or PIN!");
+            } else {
+                System.out.println("\nYou have successfully logged in!");
+                runAccountMenu(cardNumber);
             }
+        } catch (RecipientCardNumberNotExistException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 
-            System.out.println("\nYou have successfully logged in!\n");
-            runAccountMenu(cardNumber);
-        } catch (NumberCardIsNotInDBException e) {
-            System.out.println("\nWrong card number or PIN!\n");
+    private void addIncome(String cardNumber) {
+            System.out.println("\nEnter income:");
+            String income = scanToken();
+
+            boolean addIncome = controller.addIncome(income, cardNumber);
+            if (addIncome) System.out.println("\nIncome was added!");
+    }
+
+    private void doTransfer(String cardNumber) {
+            System.out.println("""
+                    
+                    Transfer
+                    Enter card number:""");
+        String cardNumberDoTransfer = scanToken();
+
+        boolean checkCardNumber = controller.isCardNumberValid(cardNumber, cardNumberDoTransfer);
+        if (checkCardNumber) {
+            System.out.println("Enter how much money you want to transfer:");
+            String money = scanToken();
+
+            boolean doTransfer =  controller.doTransfer(cardNumber, cardNumberDoTransfer, money);
+            if(doTransfer) System.out.println("Success!");
         }
     }
 
@@ -77,12 +111,19 @@ public class ConsoleApplication {
         while (!exit) {
             printAccountMenu();
             switch (scanInt()) {
-                case 1 -> System.out.println(controller.getBalance(cardNumber));
-                case 2 -> {
-                    System.out.println("\nYou have successfully logged out!\n");
+                case BALANCE -> controller.getBalance(cardNumber);
+                case ADD_INCOME -> addIncome(cardNumber);
+                case DO_TRANSFER -> doTransfer(cardNumber);
+                case CLOSE_ACCOUNT -> {
+                    boolean deleted = controller.deleteAccount(cardNumber);
+                    System.out.println(deleted ? "\nThe account has been closed!" : "\nFailed to close account.");
                     exit = true;
                 }
-                case 0 -> {
+                case LOG_OUT -> {
+                    System.out.println("\nYou have successfully logged out!");
+                    exit = true;
+                }
+                case EXIT -> {
                     System.out.println("\nBye!");
                     System.exit(0);
                 }
